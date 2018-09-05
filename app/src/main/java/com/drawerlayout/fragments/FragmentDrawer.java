@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -21,8 +22,14 @@ public class FragmentDrawer extends Fragment {
     private DrawerLayout mDrawerLayout;
     ListView mListView;
 
+    private OnDrawerItemClickListener onDrawerItemClickListener;
+
     public FragmentDrawer() {
         //must need default constructor
+    }
+
+    public void setOnDrawerItemClickListener(OnDrawerItemClickListener onDrawerItemClickListener) {
+        this.onDrawerItemClickListener = onDrawerItemClickListener;
     }
 
     @Override
@@ -40,9 +47,24 @@ public class FragmentDrawer extends Fragment {
     }
 
     private void setUpNavigationItems() {
-        String[] navigationItems = {"Home", "AboutUs", "ContactUs"};
-        ArrayAdapter<String> mAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, navigationItems);
+        final String[] navigationItems = {"Home", "AboutUs", "ContactUs"};
+        final ArrayAdapter<String> mAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, navigationItems);
         mListView.setAdapter(mAdapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String sMenu = mAdapter.getItem(position);
+                if(sMenu == null) {
+                    return;
+                }
+                for(String s : navigationItems) {
+                    if(sMenu.equals(s)) {
+                        onDrawerItemClickListener.onDrawerItemClick(sMenu, position);
+                        return;
+                    }
+                }
+            }
+        });
     }
 
     public void setUp(int fragmentId, DrawerLayout drawerLayout, final Toolbar toolbar) {
@@ -77,5 +99,9 @@ public class FragmentDrawer extends Fragment {
             }
         });
 
+    }
+
+    public interface OnDrawerItemClickListener {
+        void onDrawerItemClick(String menu, int position);
     }
 }
